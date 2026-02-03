@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+*.pyo
+node_modules/
+dist/
+.venv/
+*.egg-info/
+.env
+transcriptions/
+*.db
+*.wav
+*.webm
+.DS_Store
+deployment/*.key
+deployment/*.crt
+tests/playwright-report/
+tests/test-results/

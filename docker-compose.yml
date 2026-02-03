@@ -1,0 +1,29 @@
+services:
+  whisper-app:
+    build: .
+    ports:
+      - "32222:443"
+    volumes:
+      - ./transcriptions:/app/transcriptions
+      - ./deployment/server3.tail3d5840.ts.net.crt:/etc/ssl/certs/tailscale.crt:ro
+      - ./deployment/server3.tail3d5840.ts.net.key:/etc/ssl/private/tailscale.key:ro
+    extra_hosts:
+      - "mini.local:100.65.66.13"
+    environment:
+      - WHISPER_API_URL=http://mini.local:8123
+      - FEATURE_RETRY=true
+      - FEATURE_TEXT_PROCESSING=true
+      - FEATURE_PII=true
+      - FEATURE_LANG_DETECT=true
+      - FEATURE_DIARIZATION=false
+      - FEATURE_SUMMARY=false
+      - CASING_PROFILE=meeting_notes
+      - JOBS_DB_PATH=/app/transcriptions/jobs.db
+      - SESSIONS_DIR=/app/transcriptions/sessions
+      - AUTH_TOKEN=${AUTH_TOKEN:-}
+    healthcheck:
+      test: ["CMD", "curl", "-fk", "https://localhost/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="/voice-chat/">
+    <title>ClawdBot Voice Chat</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🦞 ClawdBot Voice Chat</h1>
+            <p class="subtitle">Prata med din AI-assistent på svenska</p>
+        </header>
+
+        <div class="status-bar">
+            <span id="status" class="status-disconnected">Ej ansluten</span>
+            <span id="mic-status" class="mic-inactive">🎤 Redo</span>
+        </div>
+
+        <div class="chat-container" id="chatContainer">
+            <!-- Chat messages will appear here -->
+        </div>
+
+        <div class="controls">
+            <button id="recordBtn" class="btn-record" disabled>
+                <span class="btn-icon">🎤</span>
+                <span class="btn-text">Tryck för att prata</span>
+            </button>
+        </div>
+
+        <div class="info">
+            <p><strong>Första gången:</strong> Ge tillåtelse för mikrofon när browsern frågar.</p>
+            <p>Tryck på knappen för att starta/stoppa inspelning. Eller tryck Space.</p>
+            <p class="version">Web Voice Channel v1.0</p>
+        </div>
+    </div>
+
+    <script src="voice-chat.js"></script>
+</body>
+</html>

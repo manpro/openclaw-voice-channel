@@ -1,0 +1,14 @@
+{
+  "name": "@local/openclaw-web-voice",
+  "version": "1.0.0",
+  "description": "Web-based voice chat channel for OpenClaw",
+  "type": "module",
+  "openclaw": {
+    "extensions": ["./index.ts"]
+  },
+  "dependencies": {
+    "ws": "^8.18.0",
+    "form-data": "^4.0.0",
+    "node-fetch": "^3.3.2"
+  }
+}

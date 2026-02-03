@@ -1,0 +1,35 @@
+{
+  "id": "openclaw-web-voice",
+  "channels": ["openclaw-web-voice"],
+  "uiHints": {
+    "port": {
+      "label": "WebSocket Port",
+      "help": "Port for the WebSocket server"
+    },
+    "whisperUrl": {
+      "label": "Whisper STT URL",
+      "help": "kb-whisper server URL for speech-to-text"
+    },
+    "ttsUrl": {
+      "label": "TTS URL",
+      "help": "Piper TTS server URL for text-to-speech"
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "port": {
+        "type": "number",
+        "default": 9000
+      },
+      "whisperUrl": {
+        "type": "string",
+        "default": "https://server3.tail3d5840.ts.net:32222"
+      },
+      "ttsUrl": {
+        "type": "string",
+        "default": "http://localhost:8006"
+      }
+    }
+  }
+}
