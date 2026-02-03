@@ -23,9 +23,7 @@ interface UseOpenClawTranscriptionReturn {
   setProfile: (p: ProfileName) => void;
   profileConfig: ProfileConfig;
 
-  // Model selection
-  selectedModel: string;
-  setSelectedModel: (model: string) => void;
+  // Model selection BORTTAGEN - hanteras av agent
 
   // Actions
   startRealtime: () => Promise<void>;
@@ -38,22 +36,11 @@ export function useOpenClawTranscription(): UseOpenClawTranscriptionReturn {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastAudioBlob, setLastAudioBlob] = useState<Blob | null>(null);
-  const [selectedModel, setSelectedModel] = useState("z-ai-glm/glm-4.7");
 
   const { isRecording, startRecording, stopRecording, error: recorderError } =
     useMediaRecorder();
   const { isConnected, userId, connect, disconnect, send, sendModelChange, sendProfileChange } = useOpenClawWebSocket();
   const { profile, setProfile, config: profileConfig, isWarming, warmupData } = useProfile();
-
-  const handleModelChange = useCallback((model: string) => {
-    setSelectedModel(model);
-    sendModelChange(model);
-    setMessages(prev => [...prev, {
-      role: 'system',
-      text: `Modell ändrad till: ${model}`,
-      timestamp: new Date().toISOString(),
-    }]);
-  }, [sendModelChange]);
 
   const handleProfileChange = useCallback((newProfile: ProfileName) => {
     setProfile(newProfile);
@@ -170,8 +157,6 @@ export function useOpenClawTranscription(): UseOpenClawTranscriptionReturn {
     profile,
     setProfile: handleProfileChange,
     profileConfig,
-    selectedModel,
-    setSelectedModel: handleModelChange,
     startRealtime,
     stopRealtime,
     clearMessages,

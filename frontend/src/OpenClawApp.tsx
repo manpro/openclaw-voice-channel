@@ -1,6 +1,5 @@
 import { useOpenClawTranscription } from "./hooks/useOpenClawTranscription";
 import { ProfileSelector } from "./components/ProfileSelector";
-import { ModelSelector } from "./components/ModelSelector";
 import { RealtimePanel } from "./components/RealtimePanel";
 import { ChatHistory } from "./components/ChatHistory";
 
@@ -17,8 +16,6 @@ export default function OpenClawApp() {
     profile,
     setProfile,
     profileConfig,
-    selectedModel,
-    setSelectedModel,
     startRealtime,
     stopRealtime,
     clearMessages,
@@ -75,11 +72,13 @@ export default function OpenClawApp() {
               warmupData={warmupData}
             />
 
-            <ModelSelector
-              selectedModel={selectedModel}
-              onSelect={setSelectedModel}
-              disabled={isRecording}
-            />
+            <div className="bg-gray-900 rounded-lg shadow-lg border border-gray-800 p-4">
+              <h2 className="text-lg font-semibold mb-2 text-gray-100">ℹ️ Information</h2>
+              <p className="text-sm text-gray-400">
+                Modell väljs automatiskt av ClawdBot.
+                Använd Whisper-profil för att justera transkriptionskvalitet.
+              </p>
+            </div>
 
             <RealtimePanel
               isRecording={isRecording}
@@ -109,9 +108,9 @@ export default function OpenClawApp() {
         </div>
 
         <div className="mt-6 text-center text-xs text-gray-600">
-          <p>OpenClaw Voice Channel v2.0 - Whisper STT + ClawdBot LLM + Piper TTS</p>
+          <p>OpenClaw Voice Channel v2.0 - ClawdBot Agent med Skills</p>
           <p className="mt-1">
-            Tryck "Starta inspelning" och prata. Släpp för att skicka till ClawdBot.
+            Tryck "Starta inspelning" och prata med ClawdBot. Agent hanterar conversation, memory och tools.
           </p>
         </div>
       </main>
