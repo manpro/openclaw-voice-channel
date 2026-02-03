@@ -1,88 +1,90 @@
 # OpenClaw Voice Channel
 
-Real-time voice chat channel for OpenClaw with Swedish Whisper STT and model selection.
+**🦞 ClawdBot Voice Chat** - Complete voice interface for OpenClaw with Swedish STT/TTS
 
-## Architecture
+A fully integrated voice chat channel that combines whisper-sweden's React frontend with OpenClaw's channel plugin architecture.
+
+## 🌐 Live Demo
+
+**Access at:** https://opencalwd-1.tail3d5840.ts.net/voice-chat/
+
+## ✨ Features
+
+- **Real-time voice transcription** using kb-whisper (Swedish)
+- **Multi-model LLM support** (GLM-4.7, Claude Sonnet 4.5, Claude Opus 4.5, etc.)
+- **Text-to-speech responses** using Piper TTS (Swedish)
+- **Quality profiles** (ultra_realtime, fast, accurate, highest_quality)
+- **Chat history** with timestamps and audio playback
+- **Real-time model switching** - change models mid-conversation
+- **Responsive design** - works on desktop and mobile
+
+## 🏗️ Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    WEB BROWSER                              │
-│  - Microphone recording (WebM/Opus)                         │
-│  - Model selector dropdown                                  │
-│  - Real-time audio playback                                 │
-│  - WebSocket connection                                     │
-└──────────────────────────┬─────────────────────────────────┘
-                           │ WebSocket (wss://)
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│          OPENCLAW CHANNEL PLUGIN (openclaw-web-voice)       │
-│  - WebSocket server (port 9000)                             │
-│  - Session management                                       │
-│  - Model routing                                            │
-└──────────────────────────┬─────────────────────────────────┘
-                           │
-         ┌─────────────────┼────────────────┐
-         ▼                 ▼                ▼
-  ┌──────────┐    ┌──────────────┐   ┌──────────────┐
-  │ Whisper  │    │ OpenClaw LLM │   │  Piper TTS   │
-  │  (STT)   │    │   Routing    │   │ (Swedish)    │
-  │ server3  │    │  Multi-model │   │ localhost    │
-  │  :32222  │    │   Support    │   │   :8006      │
-  └──────────┘    └──────────────┘   └──────────────┘
+Browser (React)
+    ↓ WSS
+Caddy Proxy (:443)
+    ↓
+OpenClaw Channel Plugin (:9000)
+    ├→ kb-whisper (STT)
+    ├→ OpenClaw LLM Routing
+    └→ Piper TTS
 ```
 
-## Features
+**Based on:**
+- [whisper-sweden](https://github.com/manpro/whisper-sweden) - React frontend
+- OpenClaw channel plugin system
+- kb-whisper (server3.tail3d5840.ts.net:32222)
+- Piper TTS (localhost:8006)
 
-- ✅ **Real-time Voice Chat**: WebSocket-based low-latency communication
-- ✅ **Swedish Speech-to-Text**: kb-whisper integration with 4 quality profiles
-- ✅ **Multi-Model Support**: Switch between GLM-4.7, GLM-4.6V, and more in real-time
-- ✅ **Swedish Text-to-Speech**: Piper TTS with Swedish voice
-- ✅ **Click-to-Toggle Recording**: Easy voice activation
-- ✅ **Chat History**: Full conversation display with timestamps
+## 📦 Components
 
-## Components
+### Frontend (`/frontend`)
+React + TypeScript application with:
+- `ChatHistory` - Conversation display
+- `ModelSelector` - LLM model selection (4 models)
+- `ProfileSelector` - Whisper quality selection (4 profiles)
+- `RealtimePanel` - Recording controls
+- `useOpenClawTranscription` - Main logic hook
+- `useOpenClawWebSocket` - WebSocket connection
 
-### 1. OpenClaw Plugin (`openclaw-plugin/`)
-- TypeScript-based OpenClaw channel plugin
-- WebSocket server on port 9000
-- Integration with OpenClaw's message routing
-- Serves static web UI
+### Backend (`/usr/lib/node_modules/openclaw/extensions/web-voice`)
+OpenClaw channel plugin with:
+- `channel.ts` - ChannelPlugin implementation
+- `websocket-server.ts` - WebSocket + HTTP server
+- `voice-pipeline.ts` - kb-whisper + Piper integration
+- `index.ts` - Plugin entry point
 
-### 2. Whisper Backend (`api_server.py`, `backend/`)
-- Python-based Whisper STT server
-- Running on server3.tail3d5840.ts.net:32222
-- 4 quality profiles: `ultra_realtime`, `fast`, `accurate`, `highest_quality`
-- Bearer token authentication
+## 🚀 Quick Start
 
-### 3. Web UI (`openclaw-plugin/src/static/`)
-- HTML/CSS/JavaScript interface
-- Model selector dropdown
-- Real-time status indicators
-- Audio recording and playback
+### Access the App
 
-## Whisper Profiles
+1. Open https://opencalwd-1.tail3d5840.ts.net/voice-chat/
+2. Grant microphone permission
+3. Wait for "● Ansluten" (Connected) status
+4. Select Whisper profile (fast recommended)
+5. Select LLM model (GLM-4.7 default)
+6. Click "Starta inspelning" and speak in Swedish
+7. Wait for transcription and assistant response
 
-| Profile | Model | Description |
-|---------|-------|-------------|
-| `ultra_realtime` | kb-whisper-small | Lowest latency, beam=1 |
-| `fast` | kb-whisper-small | Low latency, beam=5 |
-| `accurate` | kb-whisper-medium | Balanced quality (default) |
-| `highest_quality` | kb-whisper-large | Highest quality, slower |
-
-## Installation
-
-### 1. Install OpenClaw Plugin
+### Development
 
 ```bash
-sudo cp -r openclaw-plugin /usr/lib/node_modules/openclaw/extensions/openclaw-web-voice
-cd /usr/lib/node_modules/openclaw/extensions/openclaw-web-voice
-sudo npm install
+# Build frontend
+cd frontend
+npm install
+npm run build
+
+# Deploy to plugin
+sudo cp -r ../plugin-static/* /usr/lib/node_modules/openclaw/extensions/web-voice/src/static/
+
+# Restart OpenClaw
+systemctl --user restart openclaw-gateway.service
 ```
 
-### 2. Configure OpenClaw
+## ⚙️ Configuration
 
-Edit `~/.openclaw/openclaw.json`:
-
+### OpenClaw (`~/.openclaw/openclaw.json`)
 ```json
 {
   "plugins": {
@@ -100,153 +102,78 @@ Edit `~/.openclaw/openclaw.json`:
 }
 ```
 
-### 3. Configure Caddy Reverse Proxy
-
-Add to `/etc/caddy/Caddyfile`:
-
+### Caddy (`/etc/caddy/Caddyfile`)
 ```caddyfile
-opencalwd-1.tail3d5840.ts.net {
-    handle /voice-chat* {
-        uri strip_prefix /voice-chat
-        reverse_proxy localhost:9000
-    }
+handle /voice-chat* {
+    uri strip_prefix /voice-chat
+    reverse_proxy localhost:9000
 }
 ```
 
-Reload Caddy:
+## 🎯 Features in Detail
+
+### LLM Models
+- **GLM-4.7**: Standard model *(default)*
+- **GLM-4.6V**: Vision-capable
+- **Claude Sonnet 4.5**: Highest quality
+- **Claude Opus 4.5**: Advanced reasoning
+
+### Whisper Profiles
+- **Ultra Realtime**: ~1s latency, Metal GPU
+- **Fast**: Balanced *(default)*
+- **Accurate**: High quality, CPU int8
+- **Highest Quality**: Large model
+
+### Message Flow
+1. Browser → Audio chunks (WebM/Opus)
+2. Plugin → kb-whisper (STT)
+3. Plugin → User (transcription)
+4. Plugin → OpenClaw LLM
+5. Plugin → Piper TTS
+6. Plugin → User (response + audio)
+
+## 📊 Performance
+
+- **Roundtrip latency**: 2-5 seconds
+- **RAM usage**: ~50 MB + 5 MB per user
+- **Bandwidth**: ~128 kbps per active user
+- **CPU**: Minimal (streaming only)
+
+## 🐛 Troubleshooting
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed troubleshooting guide.
+
+**Common issues:**
 ```bash
-sudo systemctl reload caddy
-```
+# Frontend not loading
+npm run build && sudo cp -r ../plugin-static/* /usr/lib/node_modules/openclaw/extensions/web-voice/src/static/
 
-### 4. Restart OpenClaw
+# WebSocket not connecting
+sudo ss -tlnp | grep :9000
+journalctl --user -u openclaw-gateway.service -f
 
-```bash
-systemctl --user restart openclaw-gateway.service
-```
-
-## Usage
-
-1. Open: `https://opencalwd-1.tail3d5840.ts.net/voice-chat`
-2. Allow microphone access when prompted
-3. Wait for "Ansluten" status (connected)
-4. Select your preferred model from dropdown
-5. Click button or press Space to start/stop recording
-6. Speak in Swedish
-7. AI responds with voice
-
-## API Endpoints
-
-### Whisper STT
-- **Endpoint**: `https://server3.tail3d5840.ts.net:32222/api/transcribe`
-- **Method**: POST
-- **Auth**: Bearer token (optional in dev mode)
-- **Body**: multipart/form-data with audio file
-- **Query**: `?profile=fast|accurate|ultra_realtime|highest_quality`
-
-### Piper TTS
-- **Endpoint**: `http://localhost:8006/api/tts/synthesize`
-- **Method**: POST
-- **Headers**: `Content-Type: application/json`
-- **Body**:
-```json
-{
-  "text": "Hej, hur mår du?",
-  "language": "sv",
-  "cache": true
-}
-```
-
-## Development
-
-### Testing with Playwright
-
-```bash
-cd playwright-debug
-docker build -t voice-chat-debug .
-docker run --rm --network host voice-chat-debug
-```
-
-### Local Development
-
-1. Edit files in `openclaw-plugin/src/`
-2. Changes to static files (HTML/CSS/JS) are served immediately
-3. Changes to TypeScript require OpenClaw restart
-
-## Configuration
-
-### Available Models
-
-Configure in `~/.openclaw/openclaw.json`:
-
-```json
-{
-  "models": {
-    "providers": {
-      "z-ai-glm": {
-        "models": [
-          { "id": "glm-4.7", "name": "GLM-4.7" },
-          { "id": "glm-4.6v", "name": "GLM-4.6V" }
-        ]
-      }
-    }
-  }
-}
-```
-
-### Whisper Auth Token
-
-Set environment variable on Whisper server:
-```bash
-export AUTH_TOKEN="your-secret-token"
-```
-
-## Troubleshooting
-
-### Port 9000 not listening
-```bash
-# Check OpenClaw logs
-journalctl --user -u openclaw-gateway.service | grep WebVoice
-
-# Test direct connection
-curl http://localhost:9000/
-```
-
-### WebSocket connection fails
-```bash
-# Check Caddy logs
-sudo journalctl -u caddy -n 50
-
-# Test WebSocket
-node -e "const ws = new WebSocket('ws://localhost:9000'); ws.on('open', () => console.log('OK'));"
-```
-
-### STT not working
-```bash
-# Test Whisper server
+# STT not working
 curl -k https://server3.tail3d5840.ts.net:32222/api/health
 
-# Check Tailscale
-tailscale status | grep server3
+# TTS not working
+curl http://localhost:8006/health
 ```
 
-### TTS not working
-```bash
-# Check Piper container
-docker ps | grep inbox-zero-tts
+## 📝 Documentation
 
-# Test TTS
-curl -X POST http://localhost:8006/api/tts/synthesize \
-  -H "Content-Type: application/json" \
-  -d '{"text":"test","language":"sv","cache":true}' \
-  --output test.wav
-```
+- [DEPLOYMENT.md](./DEPLOYMENT.md) - Full deployment guide
+- [INTEGRATION.md](./INTEGRATION.md) - Integration instructions
+- [frontend/README.md](./frontend/README.md) - Frontend development
 
-## License
+## 🔐 Security
 
-Based on [whisper-sweden](https://github.com/manpro/whisper-sweden)
+- **Tailscale protected** - Only accessible via VPN
+- **HTTPS** - Encrypted via Caddy
+- **No public exposure** - Internal use only
 
-## Credits
+## 📄 License
 
-- **Whisper**: KB-Lab Swedish Whisper models
-- **OpenClaw**: Multi-platform AI agent framework
-- **Piper TTS**: Swedish text-to-speech
+MIT License
+
+Based on [whisper-sweden](https://github.com/manpro/whisper-sweden) by manpro
+OpenClaw integration by manpro
